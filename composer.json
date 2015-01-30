@@ -1,0 +1,22 @@
+{
+    "name": "sinasalek/pdoplus",
+    "description": "PDO wrapper. Extends PDO and PDOStatement with useful methods.",
+    "keywords" : ["database", "pdo", "mysql"],
+    "license": "MIT",
+
+    "authors": [
+        {
+            "name": "Sina Salek",
+            "email": "sinasalek@gmail.com"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.3.0",
+        "sorskod/db": "dev-master"
+    },
+
+    "autoload": {
+        "psr-0": {"database\\": "src/"}
+    }
+}
