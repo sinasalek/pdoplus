@@ -811,11 +811,10 @@ class PDO extends DB {
       $sqlQuery .= "`$keyColumnName`=" . $keyColumnValue->getValue() . " ";
     }
     else {
-      $keyColumnValue = $this->smartEscapeString($keyColumnValue);
-      $sqlQuery .= "`$keyColumnName`='$keyColumnValue' ";
+      $keyColumnValue = $this->quote($keyColumnValue);
+      $sqlQuery .= "`$keyColumnName` = $keyColumnValue ";
     }
 
-    $sqlQuery .= "LIMIT 1";
     return $sqlQuery;
   }
 
@@ -831,7 +830,7 @@ class PDO extends DB {
     $sqlResult = $this->query($sqlQuery);
     if ($sqlResult) {
       if ($this->numRows($sqlResult) > 0) {
-        $row = $this->fetchArray($sqlResult, MYSQL_ASSOC);
+        $row = $this->fetchArray($sqlResult);
         return $row;
       }
     }
@@ -2075,93 +2074,6 @@ class PDO extends DB {
     } while (next($sqlRows) !== FALSE);
 
     return $queryLine;
-  }
-
-  /**
-   * @param $sqlQuery
-   * @param null $linkIdentifier
-   * @return bool
-   */
-  public function __query($sqlQuery, $linkIdentifier = NULL) {
-    $this->__startTimer();
-
-    if (is_null($linkIdentifier)) {
-      $linkIdentifier = $this->connectionLink;
-    }
-
-    if ($this->noQueryExecution) {
-      return TRUE;
-    }
-
-    if ($this->autoParseQueriesEnabled === TRUE) {
-      $sqlQuery = $this->parseQuery($sqlQuery);
-    }
-
-    $invalidKeyWords = array(
-      'INSERT',
-      'UPDATE',
-      'DELETE',
-      'DROP',
-      'ALTER',
-      'CREATE',
-      'INDEX',
-      'REFERENCES'
-    );
-    foreach ($invalidKeyWords as $invalidKeyWord) {
-      if (preg_match('/^ *' . $invalidKeyWord . ' .*/si', $sqlQuery)) {
-        $this->raiseError('Using $this->query for INSERT or UPDATE or DELETE or any executable STATEMENT does not allowed');
-      }
-    }
-
-    if (is_null($linkIdentifier)) {
-      $result = $this->adaptor->query($sqlQuery);
-      $this->registerQuery($sqlQuery, $result, $this->error($linkIdentifier));
-    }
-    else {
-      $result = $this->adaptor->query($sqlQuery, $linkIdentifier);
-      $this->registerQuery($sqlQuery, $result, $this->error($linkIdentifier));
-    }
-    return $result;
-  }
-
-  /**
-   * @param $sqlQuery
-   * @param null $linkIdentifier
-   * @return bool
-   */
-  public function exec($sqlQuery, $linkIdentifier = NULL) {
-    if (is_null($linkIdentifier)) {
-      $linkIdentifier = $this->connectionLink;
-    }
-
-    $this->__startTimer();
-
-    if ($this->noQueryExecution) {
-      return TRUE;
-    }
-
-    if ($this->autoParseQueriesEnabled === TRUE) {
-      $sqlQuery = $this->parseQuery($sqlQuery);
-    }
-    if (1 == 0) {
-      $invalidKeyWords = array(
-        'SELECT'
-      );
-      foreach ($invalidKeyWords as $invalidKeyWord) {
-        if (preg_match('/^ *' . $invalidKeyWord . ' .*/si', $sqlQuery)) {
-          $this->raiseError('Using $this->exec for SELECT does not allowed');
-        }
-      }
-    }
-    if (is_null($linkIdentifier)) {
-      $result = $this->adaptor->exec($sqlQuery);
-      $this->registerQuery($sqlQuery, $result, $this->error($linkIdentifier));
-    }
-    else {
-      $result = $this->adaptor->exec($sqlQuery, $linkIdentifier);
-      $this->registerQuery($sqlQuery, $result, $this->error($linkIdentifier));
-    }
-    return $result;
   }
 
   /**
