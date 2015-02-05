@@ -784,7 +784,7 @@ class PDO extends DB {
    * @param $keyColumnValue
    * @return bool
    */
-  public function update($tableName, $keyColumnName, $columnsValues, $keyColumnValue) {
+  public function updateSimple($tableName, $keyColumnName, $columnsValues, $keyColumnValue) {
     $sqlQuery = $this->getUpdateSql($tableName, $keyColumnName, $columnsValues, $keyColumnValue);
 
     $sqlQueryResult = $this->exec($sqlQuery);
@@ -1035,7 +1035,7 @@ class PDO extends DB {
    * @param $columnsValues
    * @return bool
    */
-  public function insert($tableName, $columnsValues) {
+  public function insert($tableName, $columnsValues, $stmt_key = null) {
     $sqlQuery = $this->getInsertSql($tableName, $columnsValues);
 
     $sqlQueryResult = $this->exec($sqlQuery);
