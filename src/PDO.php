@@ -690,7 +690,7 @@ class PDO extends DB {
         $sqlQuery .= "$comma `$columnName`=" . $columnValue->getValue() . "";
       }
       else {
-        $columnValue = $this->smartEscapeString($columnValue);
+        //$columnValue = $this->quote($columnValue);
         if ($columnValue === NULL) {
           $columnValue = 'NULL';
         }
@@ -970,7 +970,7 @@ class PDO extends DB {
         $sqlQuery .= "$comma `$keyColumnName`=" . $keyColumnValue->getValue() . "";
       }
       else {
-        $keyColumnValue = $this->smartEscapeString($keyColumnValue);
+        //$keyColumnValue = $this->smartEscapeString($keyColumnValue);
         $sqlQuery .= "$comma `$keyColumnName`='$keyColumnValue' ";
       }
 
@@ -1013,7 +1013,7 @@ class PDO extends DB {
         $sqlQuery .= "$comma `$columnName`=" . $columnValue->getValue() . "";
       }
       else {
-        $columnValue = $this->smartEscapeString($columnValue);
+        //$columnValue = $this->quote($columnValue);
         if ($columnValue === NULL) {
           $columnValue = 'NULL';
         }
@@ -1061,7 +1061,7 @@ class PDO extends DB {
     else {
       $limitClause = '';
     }
-    $keyColumnValue = $this->smartEscapeString($keyColumnValue);
+    //$keyColumnValue = $this->smartEscapeString($keyColumnValue);
     if ($this->isStatement($keyColumnValue)) {
       /* @var $keyColumnValue string|DatabaseStatement */
       $sqlQuery = "DELETE FROM `$tableName` WHERE `$keyColumnName`=" . $keyColumnValue->getValue() . " $limitClause";
@@ -2360,52 +2360,4 @@ class PDO extends DB {
     return $queries;
   }
 
-
-  // Database drivers that support SAVEPOINTs.
-  protected static $savepointTransactions = array("pgsql", "mysql");
-// The current transaction level.
-  protected $transLevel = 0;
-  protected function nestable() {
-    return in_array($this->getAttribute(PDO::ATTR_DRIVER_NAME),
-      self::$savepointTransactions);
-  }
-  function transaction($call) {
-    $this->beginTransaction();
-    try {
-      $ret = call_user_func($call);
-    } catch(Exception $e) {
-      $this->rollBack();
-      throw $e;
-    }
-    if($ret) {
-      $this->commit();
-    } else {
-      $this->rollBack();
-    }
-    return $ret;
-  }
-  public function beginTransaction() {
-    if(!$this->nestable() || $this->transLevel == 0) {
-      parent::beginTransaction();
-    } else {
-      $this->exec("SAVEPOINT LEVEL{$this->transLevel}");
-    }
-    $this->transLevel++;
-  }
-  public function commit() {
-    $this->transLevel--;
-    if(!$this->nestable() || $this->transLevel == 0) {
-      parent::commit();
-    } else {
-      $this->exec("RELEASE SAVEPOINT LEVEL{$this->transLevel}");
-    }
-  }
-  public function rollBack() {
-    $this->transLevel--;
-    if(!$this->nestable() || $this->transLevel == 0) {
-      parent::rollBack();
-    } else {
-      $this->exec("ROLLBACK TO SAVEPOINT LEVEL{$this->transLevel}");
-    }
-  }
 }
