@@ -980,7 +980,7 @@ class PDO extends DB {
     $sqlResult = $this->query($sqlQuery);
     if ($sqlResult) {
       if ($this->numRows($sqlResult) > 0) {
-        $row = $this->fetchArray($sqlResult, MYSQL_ASSOC);
+        $row = $this->fetchArray($sqlResult, PDO::FETCH_ASSOC);
         return $row;
       }
     }
@@ -2150,9 +2150,6 @@ class PDO extends DB {
    * @return mixed
    */
   public function fetchArray(\database\Statement $result, $resultType = PDO::FETCH_BOTH) {
-    if ($resultType == MYSQL_BOTH) $resultType = PDO::FETCH_BOTH;
-    if ($resultType == MYSQL_ASSOC) $resultType = PDO::FETCH_ASSOC;
-    if ($resultType == MYSQL_NUM) $resultType = PDO::FETCH_NUM;
     return $result->fetch($resultType);
   }
 
@@ -2358,6 +2355,54 @@ class PDO extends DB {
     $queries = $this->queryStack;
     $this->clearRegisteredQueries();
     return $queries;
+  }
+
+  // Database drivers that support SAVEPOINTs.
+  protected static $savepointTransactions = array("pgsql", "mysql");
+// The current transaction level.
+  protected $transLevel = 0;
+  protected function nestable() {
+    return in_array($this->getAttribute(PDO::ATTR_DRIVER_NAME),
+      self::$savepointTransactions);
+  }
+  function transaction($call) {
+    $this->beginTransaction();
+    try {
+      $ret = call_user_func($call);
+    } catch(Exception $e) {
+      $this->rollBack();
+      throw $e;
+    }
+    if($ret) {
+      $this->commit();
+    } else {
+      $this->rollBack();
+    }
+    return $ret;
+  }
+  public function beginTransaction() {
+    if(!$this->nestable() || $this->transLevel == 0) {
+      parent::beginTransaction();
+    } else {
+      $this->exec("SAVEPOINT LEVEL{$this->transLevel}");
+    }
+    $this->transLevel++;
+  }
+  public function commit() {
+    $this->transLevel--;
+    if(!$this->nestable() || $this->transLevel == 0) {
+      parent::commit();
+    } else {
+      $this->exec("RELEASE SAVEPOINT LEVEL{$this->transLevel}");
+    }
+  }
+  public function rollBack() {
+    $this->transLevel--;
+    if(!$this->nestable() || $this->transLevel == 0) {
+      parent::rollBack();
+    } else {
+      $this->exec("ROLLBACK TO SAVEPOINT LEVEL{$this->transLevel}");
+    }
   }
 
 }
