@@ -960,7 +960,7 @@ class PDO extends DB {
    * @param $keyColumnsValues
    * @return bool
    */
-  public function loadWithMultiKeys($tableName, $keyColumnsValues) {
+  public function loadWithMultiKeys($tableName, $keyColumnsValues, $orderBy = NULL) {
     $sqlQuery = "SELECT * FROM `$tableName` WHERE ";
     $comma = "";
     foreach ($keyColumnsValues as $keyColumnName => $keyColumnValue) {
@@ -975,6 +975,18 @@ class PDO extends DB {
       }
 
       $comma = ' AND ';
+    }
+
+    if (!is_null($orderBy)) {
+      $comma = '';
+      $sqlQuery .= " ORDER BY ";
+      foreach ($orderBy as $val) {
+        if (!isset($val['type'])) {
+          $val['type'] = 'ASC';
+        }
+        $sqlQuery .= "$comma {$val['columnName']} {$val['type']} ";
+        $comma = ' , ';
+      }
     }
 
     $sqlResult = $this->query($sqlQuery);
