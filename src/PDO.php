@@ -690,12 +690,10 @@ class PDO extends DB {
         $sqlQuery .= "$comma `$columnName`=" . $columnValue->getValue() . "";
       }
       else {
-        //$columnValue = $this->quote($columnValue);
         if ($columnValue === NULL) {
           $columnValue = 'NULL';
-        }
-        else {
-          $columnValue = "'$columnValue'";
+        } else {
+          $columnValue = $this->quote($columnValue);
         }
         $sqlQuery .= "$comma `$columnName`=$columnValue";
       }
@@ -727,12 +725,10 @@ class PDO extends DB {
         $sqlQuery .= "$comma `$columnName`=" . $columnValue->getValue() . "";
       }
       else {
-        $columnValue = $this->smartEscapeString($columnValue);
         if ($columnValue === NULL) {
           $columnValue = 'NULL';
-        }
-        else {
-          $columnValue = "'$columnValue'";
+        } else {
+          $columnValue = $this->quote($columnValue);
         }
         $sqlQuery .= "$comma `$columnName`=$columnValue";
       }
@@ -786,7 +782,6 @@ class PDO extends DB {
    */
   public function updateSimple($tableName, $keyColumnName, $columnsValues, $keyColumnValue) {
     $sqlQuery = $this->getUpdateSql($tableName, $keyColumnName, $columnsValues, $keyColumnValue);
-
     $sqlQueryResult = $this->exec($sqlQuery);
 
     if ($sqlQueryResult !== FALSE) {
@@ -885,12 +880,10 @@ class PDO extends DB {
         $sqlQuery .= "$comma `$columnName`=" . $columnValue->getValue() . "";
       }
       else {
-        $columnValue = $this->smartEscapeString($columnValue);
         if ($columnValue === NULL) {
           $columnValue = 'NULL';
-        }
-        else {
-          $columnValue = "'$columnValue'";
+        } else {
+          $columnValue = $this->quote($columnValue);
         }
         $sqlQuery .= "$comma `$columnName`=$columnValue";
       }
@@ -938,8 +931,8 @@ class PDO extends DB {
         $sqlWhere .= "$comma `$keyColumnName`=" . $keyColumnValue->getValue() . "";
       }
       else {
-        $keyColumnValue = $this->smartEscapeString($keyColumnValue);
-        $sqlWhere .= "$comma `$keyColumnName`='$keyColumnValue' ";
+        $keyColumnValue = $this->quote($keyColumnValue);
+        $sqlWhere .= "$comma `$keyColumnName`=$keyColumnValue ";
       }
 
       $comma = ' AND ';
@@ -970,8 +963,8 @@ class PDO extends DB {
         $sqlQuery .= "$comma `$keyColumnName`=" . $keyColumnValue->getValue() . "";
       }
       else {
-        //$keyColumnValue = $this->smartEscapeString($keyColumnValue);
-        $sqlQuery .= "$comma `$keyColumnName`='$keyColumnValue' ";
+        $keyColumnValue = $this->quote($keyColumnValue);
+        $sqlQuery .= "$comma `$keyColumnName`=$keyColumnValue ";
       }
 
       $comma = ' AND ';
@@ -1028,9 +1021,8 @@ class PDO extends DB {
         //$columnValue = $this->quote($columnValue);
         if ($columnValue === NULL) {
           $columnValue = 'NULL';
-        }
-        else {
-          $columnValue = "'$columnValue'";
+        } else {
+          $columnValue = $this->quote($columnValue);
         }
         $sqlQuery .= "$comma `$columnName`=$columnValue";
       }
@@ -1073,13 +1065,13 @@ class PDO extends DB {
     else {
       $limitClause = '';
     }
-    //$keyColumnValue = $this->smartEscapeString($keyColumnValue);
     if ($this->isStatement($keyColumnValue)) {
       /* @var $keyColumnValue string|DatabaseStatement */
       $sqlQuery = "DELETE FROM `$tableName` WHERE `$keyColumnName`=" . $keyColumnValue->getValue() . " $limitClause";
     }
     else {
-      $sqlQuery = "DELETE FROM `$tableName` WHERE `$keyColumnName`='$keyColumnValue' $limitClause";
+      $keyColumnValue = $this->quote($keyColumnValue);
+      $sqlQuery = "DELETE FROM `$tableName` WHERE `$keyColumnName`=$keyColumnValue $limitClause";
     }
     return $sqlQuery;
   }
