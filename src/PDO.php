@@ -867,8 +867,8 @@ class PDO extends DB {
         $sqlWhere .= "$comma `$keyColumnName`=" . $keyColumnValue->getValue() . "";
       }
       else {
-        $keyColumnValue = $this->smartEscapeString($keyColumnValue);
-        $sqlWhere .= "$comma `$keyColumnName`='$keyColumnValue' ";
+        $keyColumnValue = $this->quote($keyColumnValue);
+        $sqlWhere .= "$comma `$keyColumnName`= $keyColumnValue";
       }
 
       $comma = ' AND ';
