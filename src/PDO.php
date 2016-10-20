@@ -384,11 +384,11 @@ class PDO extends DB {
         $comma = ' AND ';
         if ($this->isStatement($keyColumnValue)) {
           /* @var $keyColumnValue string|DatabaseStatement */
-          $sqlQuery .= "$comma `$keyColumnName`=" . $keyColumnValue->getValue() . "";
+          $sqlQuery .= "$comma `$keyColumnName` = " . $keyColumnValue->getValue() . "";
         }
         else {
           $keyColumnValue = $this->smartEscapeString($keyColumnValue);
-          $sqlQuery .= "$comma `$keyColumnName`='$keyColumnValue' ";
+          $sqlQuery .= "$comma `$keyColumnName` = $keyColumnValue";
         }
       }
     }
